@@ -55,8 +55,8 @@ for Team in Teams:
                 cp = np.array(sampleDF[['cp']], dtype=float)
                 xyac_loc = np.array(sampleDF[['xyac_mean_yardage']], dtype=float)
                 cpXyac = cp*xyac_loc
-                entry = [year, Team, game, qb, attempts, completions, round(np.sum(cp),3), round(np.sum(xyac_loc),3)
+                entry = [year, Team, game, drive, qb, attempts, completions, round(np.sum(cp),3), round(np.sum(xyac_loc),3)
                  , round((np.sum(xyac_loc)/np.sum(cp)),3), round(np.sum(cpXyac),3)]
                 data.append(entry)
     print('___')
-qb_perf = pd.DataFrame(data, columns=['Season', 'Team', 'gameID', 'QB', 'Att', 'Comps', 'CP_Sum', 'Avg_XYAC_Sum', 'XYACperCP', 'CP*XYAC_Sum'])
+qb_perf = pd.DataFrame(data, columns=['Season', 'Team', 'gameID', 'Drive', 'QB', 'Att', 'Comps', 'CP_Sum', 'Avg_XYAC_Sum', 'XYACperCP', 'CP*XYAC_Sum'])
