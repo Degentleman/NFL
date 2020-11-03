@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri Aug  7 14:11:27 2020
+Created on Mon Apr 20 04:20:00 2020
 
 @author: Degentleman
 """
 import pandas as pd
 import numpy as np
+# Specify the year of the play-by-play data you want to load. Must be in working directory.
 year = 2020
+#Create pandas DataFrame from nflfastR data
 DB = pd.read_csv('pbp/play_by_play_{year}.csv.gz'.format(year=year), 
                        sep=",", compression='gzip', 
                        header=0, na_filter=False,
                        error_bad_lines=False,
                        low_memory=False)
-
+#Specify columns to fillna values, this example is mainly QB-related columns
 columns = ['posteam','defteam',
            'yards_gained', 'air_yards',
            'yards_after_catch', 'score_differential',
@@ -24,22 +26,12 @@ columns = ['posteam','defteam',
            'cp', 'xyac_mean_yardage']
 
 DB[columns] = DB[columns].replace('NA', np.nan).fillna('')
-
-'''
-
-DF = pd.DataFrame()
-search_term = 'Possessions Summary'
-for f in os.listdir('.'):
-    if search_term in f and len (f) == 56:
-        print(f)
-        x = pd.read_csv(f, converters={'gameID':str,
-                                                    'teamID':str,
-                                                    'oppID':str})
-        DF = pd.concat([DF, x], axis=0, ignore_index=False)
-'''
+# Create a list of all teams in DB object.
 Teams = list(np.unique(DB.posteam))
 Teams.remove('')
+#Create blank list as data object to append as the script parses through the file.
 data = []
+# Look at each team in the DB and their unique QB data.
 for Team in Teams:
     teamDF = DB[((DB.posteam == Team) | (DB.defteam == Team))]
 
