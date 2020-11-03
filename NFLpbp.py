@@ -31,7 +31,7 @@ Teams = list(np.unique(DB.posteam))
 Teams.remove('')
 #Create blank list as data object to append as the script parses through the file.
 data = []
-# Look at each team in the DB and their unique QB data.
+# Look at each team in the DB and their unique QB data per drive.
 for Team in Teams:
     teamDF = DB[((DB.posteam == Team) | (DB.defteam == Team))]
 
@@ -45,15 +45,18 @@ for Team in Teams:
         qbDF = teamDF[(teamDF.passer_player_name == qb) & (teamDF.pass_attempt == '1') & (teamDF.cp != '') & (teamDF.xyac_mean_yardage != '')].infer_objects()
         gameIDs = np.unique(qbDF.game_id)
         for game in gameIDs:
-            sampleDF = qbDF[(qbDF.game_id == game)]
-            attempts = len(sampleDF)
-            completions = len(sampleDF[(sampleDF.complete_pass == '1')])
-            cp = np.array(sampleDF[['cp']], dtype=float)
-            xyac_loc = np.array(sampleDF[['xyac_mean_yardage']], dtype=float)
-            cpXyac = cp*xyac_loc
-            entry = [year, Team, game, qb, attempts, completions, round(np.sum(cp),3), round(np.sum(xyac_loc),3)
+            print(game)
+            gameDF = qbDF[(qbDF.game_id == game) & (qbDF.desc != 'END GAME') & (~qbDF.posteam.isin(['NA','']))]
+            drives = np.sort(np.array(np.unique(gameDF.drive),dtype=int))
+            for drive in drives:
+                sampleDF = gameDF[(gameDF.drive == str(drive))]
+                attempts = len(sampleDF)
+                completions = len(sampleDF[(sampleDF.complete_pass == '1')])
+                cp = np.array(sampleDF[['cp']], dtype=float)
+                xyac_loc = np.array(sampleDF[['xyac_mean_yardage']], dtype=float)
+                cpXyac = cp*xyac_loc
+                entry = [year, Team, game, qb, attempts, completions, round(np.sum(cp),3), round(np.sum(xyac_loc),3)
                  , round((np.sum(xyac_loc)/np.sum(cp)),3), round(np.sum(cpXyac),3)]
-
-            data.append(entry)
+                data.append(entry)
     print('___')
 qb_perf = pd.DataFrame(data, columns=['Season', 'Team', 'gameID', 'QB', 'Att', 'Comps', 'CP_Sum', 'Avg_XYAC_Sum', 'XYACperCP', 'CP*XYAC_Sum'])
